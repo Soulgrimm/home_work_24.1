@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path
 
 from materials.views import CourseViewSet, LessonCreateView, LessonListView, LessonRetrieveView, LessonUpdateView, \
-    LessonDestroyView
+    LessonDestroyView, SubscriptionView
 
 app_name = MaterialsConfig.name
 
@@ -16,4 +16,5 @@ urlpatterns = [
     path('lesson/view/<int:pk>/', LessonRetrieveView.as_view(), name='lesson-get'),
     path('lesson/update/<int:pk>/', LessonUpdateView.as_view(), name='lesson-update'),
     path('lesson/delete/<int:pk>/', LessonDestroyView.as_view(), name='lesson-delete'),
+    path('subscription/', SubscriptionView.as_view(), name='subscription'),
 ] + router.urls

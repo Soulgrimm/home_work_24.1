@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-
 NULLABLE = {'blank': True, 'null': True}
 
 
@@ -35,3 +34,16 @@ class Lesson(models.Model):
     class Meta:
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='подписчик')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="подписка на крус")
+    sign_subs = models.BooleanField(default=False, verbose_name='подписка')
+
+    def __str__(self):
+        return f'{self.course}'
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
