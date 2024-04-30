@@ -1,11 +1,11 @@
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
-from materials.models import Lesson
+from materials.models import Lesson, Course, Subscription
 from users.models import User
 
 
-class LessonTestCase(APITestCase):
+class AllTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create(email='test@test.pro', is_active=True, is_superuser=True, is_staff=True)
@@ -45,3 +45,32 @@ class LessonTestCase(APITestCase):
 
         response = self.client.delete(reverse('materials:lesson-delete', args=[lesson.id]))
         self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_subscribe_course(self):
+        course_item = Course.objects.create(is_author=self.user,
+                                            title='test course',
+                                            description='test content')
+
+        subs = {
+            "user": self.user,
+            "course": course_item.id
+        }
+
+        response = self.client.post(reverse('materials:subscription'), data=subs)
+        self.assertEqual(response.data['message'], 'подписка добавлена')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_unsubscribe_course(self):
+        course_item = Course.objects.create(is_author=self.user,
+                                            title='test course',
+                                            description='test content')
+
+        subs = {
+            "user": self.user,
+            "course": course_item.id,
+        }
+
+        self.client.post(reverse('materials:subscription'), data=subs)
+        response = self.client.post(reverse('materials:subscription'), data=subs)
+        self.assertEqual(response.data['message'], 'подписка удалена')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

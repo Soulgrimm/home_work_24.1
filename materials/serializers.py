@@ -13,7 +13,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     num_of_lessons = serializers.SerializerMethodField()
-    lessons = LessonSerializer(source='lesson_set', many=True, read_only=True)
+    lessons = LessonSerializer(many=True, read_only=True)
     subscription = serializers.SerializerMethodField()
 
     def get_num_of_lessons(self, instance):
@@ -23,11 +23,13 @@ class CourseSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_authenticated:
             subscription = Subscription.objects.filter(user=user, course=instance).first()
-            return subscription.sign_subs
+            if subscription:
+                return subscription.sign_subs
+        return False
 
     class Meta:
         model = Course
-        fields = ('id', 'title', 'num_of_lessons')
+        fields = '__all__'
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
