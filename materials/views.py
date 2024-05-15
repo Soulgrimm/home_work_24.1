@@ -8,6 +8,7 @@ from materials.permissions import IsStaff, IsAuthor
 from materials.serializers import CourseSerializer, LessonSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from materials.tasks import update_course
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -20,6 +21,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_course = serializer.save()
         new_course.is_author = self.request.user
         new_course.save()
+
+    def perform_update(self, serializer):
+        course_update_notification = serializer.save()
+        update_course.delay(course_update_notification.id)
+        course_update_notification.save()
 
     def has_permission(self):
         if self.action == 'create':

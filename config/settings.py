@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_filters',
+    'django_celery_beat',
 
     'users',
     'materials',
@@ -134,6 +135,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'users.User'
 
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_USE_SSL = True
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -144,3 +151,25 @@ REST_FRAMEWORK = {
 }
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = "Australia/Tasmania"
+
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = True
+
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BEAT_SCHEDULE = {
+    'check_activity': {
+        'task': 'materials.tasks.check_activity',
+        'schedule': timedelta(minutes=1),
+    },
+}
